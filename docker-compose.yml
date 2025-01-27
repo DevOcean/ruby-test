@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    container_name: bike-shop-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: securepassword123
+      POSTGRES_DB: bike_shop_development
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+    container_name: bike-shop-app
+    command: bash -c "bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      # These ENV vars will help Rails to connect to the db
+      DATABASE_HOST: db
+      DATABASE_USERNAME: bike_shop_user
+      DATABASE_PASSWORD: securepassword123
+      DATABASE_NAME: bike_shop_development
+      DATABASE_PORT: 5432
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
